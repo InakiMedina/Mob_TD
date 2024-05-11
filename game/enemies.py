@@ -4,6 +4,29 @@ from abc import ABC
 from sprites import *
 from save_data import *
 
+class HpBar(GameObject):
+	def __init__(self, w, h, dist, thick):
+		self.w = w
+		self.h = h
+		self.dist = dist
+		self.thick = thick
+		self.spritePos = (0, 0)
+
+	def setSpriteInfo(self, pos, w, h, hpRatio):
+		self.spritePos = pos
+		self.spriteW = w
+		self.spriteH = h
+		self.spriteHpRatio = hpRatio
+
+	def update(self, dt):
+		pass
+	
+	def draw(self, window):
+		self.outsideColor = (255, 255, 255)
+		self.insideColor = (0, 255, 0)
+		pygame.draw.rect(window, self.outsideColor, [self.spritePos[0] - self.w/2 + self.spriteW/2, self.spritePos[1] - self.dist, self.w , self.h], self.thick)
+		pygame.draw.rect(window, self.insideColor, [self.spritePos[0] - self.w/2 + self.spriteW/2 + 2 * self.thick, self.spritePos[1] - self.dist + 2 * self.thick, (self.w - 4 * self.thick) * self.spriteHpRatio, (self.thick)], self.thick)
+
 class Enemy(AnimatedSprite):
 	def __init__(self, x=0, y=0, speed=3, dir=0, hp=30):
 		super().__init__(x, y, speed, dir)
@@ -14,10 +37,7 @@ class Enemy(AnimatedSprite):
 		
 		self.full_hp = hp
 		self.hp = self.full_hp
-		self.hp_bar_width = 30
-		self.hp_bar_height = 5
-		self.hp_bar_distance = 10
-		self.hp_bar_thick = 1
+		self.hpBar = HpBar(30, 5, 10, 1)
 
 	def setPath(self, path):
 		self.path = path
@@ -54,10 +74,8 @@ class Enemy(AnimatedSprite):
 		if not self.alive:
 			return
 		super().draw(window)
-		white_color = (255, 255, 255)
-		green_color = (0, 255, 0)
-		pygame.draw.rect(window, white_color, [self.pos[0] - self.hp_bar_width/2 + self.images[0].get_width()/2, self.pos[1] - self.hp_bar_distance, self.hp_bar_width , self.hp_bar_height], self.hp_bar_thick)
-		pygame.draw.rect(window, green_color, [self.pos[0] - self.hp_bar_width/2 + self.images[0].get_width()/2 + 2 * self.hp_bar_thick, self.pos[1] - self.hp_bar_distance + 2 * self.hp_bar_thick, (self.hp_bar_width - 4 * self.hp_bar_thick) * self.hp / self.full_hp, (self.hp_bar_height - 4 * self.hp_bar_thick)], self.hp_bar_thick)
+		self.hpBar.setSpriteInfo(self.pos, self.images[0].get_width(), self.images[0].get_height(), self.hp/self.full_hp)
+		self.hpBar.draw(window)
 
 class EnemyBuilder():
 	def __init__(self) -> None:
@@ -68,7 +86,7 @@ class EnemyBuilder():
 	def createEnemy(self, type, x, y, dir = 0):
 		if type == "wolf1":
 			enemy = Enemy(x, y, 0.3, dir, 30)
-			enemy.setSpeed(1)
+			enemy.setSpeed(.1)
 		else:
 			assert False, "unimplemented enemy type {}".format(type)
 		

@@ -16,12 +16,6 @@ class Sprite(GameObject):
 	def setPos(self, pos):
 		self.pos = pos
 
-	def getCenter(self):
-		return self.pos
-	
-	def setCenter(self, center):
-		self.pos = center
-
 	def setSpeed(self, speed):
 		self.speed = speed
 
@@ -37,8 +31,8 @@ class Sprite(GameObject):
 
 
 class ImageSprite(Sprite):
-	def __init__(self, x=0, y=0, image = None) -> None:
-		super().__init__(x, y)
+	def __init__(self, x=0, y=0, speed = 0, dir = 0 , image = None) -> None:
+		super().__init__(x, y, speed, dir)
 		self.filename = None
 		self.image = image
 		
