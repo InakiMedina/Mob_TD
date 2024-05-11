@@ -49,7 +49,6 @@ class UI(GameObject, Subscriber):
 		elif event['type'] == 'update_money':
 			self.setMoney(event['money'])
 
-
 	def update(self, dt):
 		pass
 

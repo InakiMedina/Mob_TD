@@ -61,6 +61,15 @@ class Enemy(AnimatedSprite):
 		self.dir = dir
 		self.i += 1
 
+		
+	def inRange(self, pos, range):
+		return math.dist(self.getCenter(), pos) <= range
+	
+	def hit(self, damage):
+		self.hp -= min(self.hp, damage)
+		self.alive = self.alive and self.hp > 0
+		return not self.alive
+	
 	def update(self, dt):
 		if not self.alive or self.reachedEnd: return
 		super().update(dt)

@@ -17,7 +17,8 @@ class Game (GameObject, Publisher):
 		self.level = Level(1)
 		self.ui = UI()
 		self.subscribe(self.ui)
-		self.notifySubscribers({'type': 'update_lives', 'lives': self.level.lives})
+		self.level.player.subscribe(self.ui)
+		self.notifySubscribers({'type': 'update_lives', 'lives': self.level.player.lives})
 
 	def run(self):
 		self.lastFrameTime = pygame.time.get_ticks()
@@ -25,6 +26,11 @@ class Game (GameObject, Publisher):
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:  
 					self.running = False
+					return
+				if event.type == pygame.MOUSEMOTION:
+					self.level.onMouseMove(pygame.mouse.get_pos())
+				if event.type == pygame.MOUSEBUTTONUP:
+					self.level.onMouseClick(pygame.mouse.get_pos())
 			currentTime = pygame.time.get_ticks()
 			dt = currentTime - self.lastFrameTime
 			self.lastFrameTime = currentTime

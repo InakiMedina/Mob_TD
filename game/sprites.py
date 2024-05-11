@@ -59,7 +59,9 @@ class ImageSprite(Sprite):
 
 class ImageFactory():
 	def __init__(self, filename, border = 1, gap = 1, w = 32, h = 32):
-		self.map = pygame.image.load(os.path.join("images", filename)).convert_alpha()
+		self.map = pygame.image.load(os.path.join("images", filename))
+		self.map.set_colorkey((0, 0, 0))
+		self.map = self.map.convert_alpha()
 		self.mapWidth = self.map.get_width()
 		self.mapHeight = self.map.get_height()
 		self.border = border
@@ -76,13 +78,20 @@ class ImageFactory():
 			x = self.border
 
 			while (x + self.w <= self.mapWidth):
-				self.images.append(self.map.subsurface(x, y,self.w, self.h))
+				self.images.append(self.map.subsurface(x, y,self.w, self.h).convert_alpha())
 				x += self.w + self.gap
 
 			y += self.h + self.gap	
 
 	def __getitem__(self, *args):
 		return self.images[args[0]].copy()
+
+class SpriteAdapter(ImageSprite):
+	def __init__(self, data):
+		super().__init__()
+		self.setImage(data[0])
+		self.setPos((data[1], data[2]))
+		self.image = self.image.convert_alpha()
 
 class AnimatedSprite(Sprite):
 	def __init__(self, x=0, y=0, speed = 0, angle = 0, animationSpeed = 0.01) -> None:
