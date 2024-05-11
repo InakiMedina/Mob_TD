@@ -1,15 +1,24 @@
 from common import *
 from sprites import *
 
+
 class Map(GameObject):
+	DEBUG = False
+
 	def __init__(self, x = 0, y = 48, w = 1280 - 128) -> None:
 		self.terrain = ImageFactory('terrain.jpeg', 1, 1)
+		self.tools = ImageFactory('tools.jpeg', 0, 0)
 		self.tileIds = []
 		self.paths = []
 		self.tiles = GameObjectsList()
+		self.decorationData = []
+		self.decorations = GameObjectsList()
+		self.allInvalid = False
 		self.x = x
 		self.y = y
 		self.w = w
+		self.markerOK = ImageSprite(-1000, -1000, self.tools[0])
+		self.markerNO = ImageSprite(-1000, -1000, self.tools[1])
 		self.level1()
 		self.load()
 
@@ -45,10 +54,11 @@ class Map(GameObject):
 			self.tileIds[j*36 + i] = 10
 			self.tileIds[j*36 + i + 1] = 12
 				
-
 		for i in range(6):
 			self.tileIds[2*36 + i] = 13
 			self.tileIds[3*36 + i] = 11
+
+		self.decorationData.append((49, 33.5*32, 2.5*32))
 
 		x,y = self.x, self.y
 		path1 = []
@@ -80,10 +90,43 @@ class Map(GameObject):
 				y += self.tiles[-1].image.get_height()
 				x = self.x
 
+		for d in self.decorationData:
+			self.decorations.append(SpriteAdapter((self.terrain[d[0]], d[1], d[2])))
+
 	def update(self, dt):
 		pass
 
 	def draw(self, window):
 		self.tiles.draw(window)	
-		for path in self.paths:
-			pygame.draw.lines(window, (255, 0, 0), False, path, 1)
+		self.decorations.draw(window)
+		self.markerOK.draw(window)
+		self.markerNO.draw(window)
+		if Map.DEBUG:
+			for path in self.paths:
+				pygame.draw.lines(window, (255, 0, 0), False, path, 1)
+	
+	def validTile(self, tid):
+		return not self.allInvalid and self.tileIds[tid] in [0]
+	
+	def pos2tile(self, pos):
+		tx = (pos[0]-self.x)//32
+		ty = (pos[1]-self.y)//32
+		tid = ty*36+tx
+		return None if tid < 0 or tid >= len(self.tileIds) else tid
+	
+	def tile2pos(self, tid):
+		return (self.x + 32 * (tid % 36), self.y + 32 * (tid // 36))
+
+	def onMouseMove(self, pos):
+		tid = self.pos2tile(pos)
+		if not tid:
+			self.markerNO.setPos((-1000, -1000))
+			self.markerOK.setPos((-1000, -1000))
+			return
+		
+		marker,nomarker = (self.markerOK,self.markerNO) if self.validTile(tid) else (self.markerNO, self.markerOK)
+		marker.setPos(self.tile2pos(tid))
+		nomarker.setPos((-1000, -1000))
+
+	def setAllInvalid(self, allInvalid):
+		self.allInvalid = allInvalid

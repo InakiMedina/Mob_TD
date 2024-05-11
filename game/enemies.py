@@ -41,6 +41,15 @@ class Enemy(AnimatedSprite):
 		self.dir = dir
 		self.i += 1
 
+		
+	def inRange(self, pos, range):
+		return math.dist(self.getCenter(), pos) <= range
+	
+	def hit(self, damage):
+		self.hp -= min(self.hp, damage)
+		self.alive = self.alive and self.hp > 0
+		return not self.alive
+	
 	def update(self, dt):
 		if not self.alive or self.reachedEnd: return
 		super().update(dt)
@@ -68,7 +77,7 @@ class EnemyBuilder():
 	def createEnemy(self, type, x, y, dir = 0):
 		if type == "wolf1":
 			enemy = Enemy(x, y, 0.3, dir, 30)
-			enemy.setSpeed(1)
+			enemy.setSpeed(.1)
 		else:
 			assert False, "unimplemented enemy type {}".format(type)
 		
